@@ -1,0 +1,319 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>JUsecase</title>
+
+		<link rel="stylesheet" href="css/reveal.css">1
+		<link rel="stylesheet" href="css/theme/black.css">
+
+		<!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+
+				<section>
+					<h1>JUsecase</h1>
+					<h3>Hands on use case centric architecture</h3>
+					<p>
+						<small><a href="https://github.com/casid">Andreas Hager</a> (<a href="http://twitter.com/mazebert">@mazebert</a>)</small><br/>
+						<small>Senior Java Developer at <a href="http://www.chrono24.com/">Chrono24</a></small>
+					</p>
+				</section>
+
+				<section>
+					<h2>Agenda</h2>
+					<p class="fragment">Motivation</p>
+					<p class="fragment">Coding Session</p>
+					<p class="fragment">Q &amp; A</p>
+				</section>
+
+				<section>
+					<section>
+						<h2>Why use case centric?</h3>
+					</section>
+					<section>
+						<h3>Separation of concerns</h3>
+						<ul>
+							<li>Separate business logic from low-level details</li>
+							<li>Make 3rd party frameworks exchangeable</li>
+							<li>Central hook for dependency management</li>
+						</ul>
+					</section>
+					<section>
+						<h3>Single Responsibility</h3>
+						<ul>
+							<li>One use case does one thing</li>
+							<li>No more bloated service classes</li>
+							<li>Make it obvious what your system is about</li>
+						</ul>
+					</section>
+					<section>
+						<h3>Be more agile</h3>
+						<ul>
+							<li>Easily fake use cases for early prototyping</li>
+							<li>Defer decisions about technical details</li>
+							<li>Don't create over engineered low-level features your use case in reality doesn't need</li>
+						</ul>
+					</section>
+					<section>
+						<h3>Ease BDD</h3>
+						<ul>
+							<li>Write tests in domain language</li>
+							<li>Refactor without pain</li>
+							<li>Make tests less fragile</li>
+						</ul>
+					</section>
+				</section>
+
+				<section>
+					<section>
+						<h2>Use cases?</h3>
+					</section>
+
+					<section>
+						<h3>Where you find them</h3>
+						<p>At the boundary of your system! They are called by</p>
+						<ul>
+							<li class="fragment">Your REST framework</li>
+							<li class="fragment">Your iOS ViewController</li>
+							<li class="fragment">Your Android Activity</li>
+							<li class="fragment">Your command line application</li>
+							<li class="fragment">...</li>
+						</ul>
+					</section>
+
+					<section>
+						<h3>How are they written?</h3>
+						<p>As <b>convenient to use</b> as possible for the <b>caller</b>!</p>
+						<ul>
+							<li class="fragment">Caller passes relevant data to the use case</li>
+							<li class="fragment">Use case processes business logic</li>
+							<li class="fragment">Caller receives relevant data for display</li>
+						</ul>
+					</section>
+
+					<section>
+						<h3>How are they written?</h3>
+						<p>Independent of <b>frameworks</b> and <b>low level details</b></p>
+						<ul>
+							<li class="fragment">They don't know what REST framework you use</li>
+							<li class="fragment">They don't know what database you use</li>
+							<li class="fragment">They don't know what MVC framework you use</li>
+						</ul>
+					</section>
+
+					<section>
+						<h3>Examples</h3>
+						<ul>
+							<li class="fragment">User logs in</li>
+							<li class="fragment">User adds item to shopping cart</li>
+							<li class="fragment">User submits order</li>
+						</ul>
+					</section>
+				</section>
+
+				<section>
+					<section>
+						<h2>Why JUsecase?</h2>
+					</section>
+
+					<section>
+						<h3>I repeated myself!</h3>
+						<ul>
+							<li class="fragment">I found myself writing the same code over and over.</li>
+							<li class="fragment">Glue for the specific project was always half-baked.</li>
+							<li class="fragment">Quite a few things went wrong because of this.</li>
+						</ul>
+					</section>
+
+					<section>
+						<h3>Things that went wrong</h3>
+						<ul>
+							<li class="fragment">Inconsistencies between use cases</li>
+							<li class="fragment">Repetitive code, too much knowledge in tests</li>
+							<li class="fragment">Fragile tests made it hard to refactor the repetive code</li>
+						</ul>
+					</section>
+
+					<section>
+						<h3>Consequence</h3>
+						<ul>
+							<li class="fragment">Extract shared code to a slim library</li>
+							<li class="fragment">Apply lessons learned.</li>
+							<li class="fragment">Make library generic enough to work for all of my projects.</li>
+							<br/>
+							<li class="fragment"><a href="https://github.com/casid/jusecase">JUsecase</a> was born!</li>
+						</ul>
+					</section>
+
+					<section>
+						<h3>The use case interface</h3>
+						<pre><code class="java">public interface Usecase&lt;Request, Response&gt; {
+    Response execute(Request request);
+}</code></pre>
+						<ul>
+							<li>The interface every use case will implement</li>
+							<li>Takes a request, returns a response</li>
+							<li>No checked exception enforced by the interface</li>
+						</ul>
+					</section>
+
+					<section>
+						<h3>The use case test class</h3>
+						<pre><code class="java">public class MyUsecaseTest extends UsecaseTest&lt;Request, Response&gt; {
+    @Before
+    public void setUp() {
+        usecase = new MyUsecase();
+    }
+}</code></pre>
+						<ul>
+							<li>JUnit 4 base class with convenience methods &amp; members</li>
+							<li>Possible since all use cases implement the same interface</li>
+							<li>There's an IntelliJ template for the boilerplate</li>
+						</ul>
+					</section>
+
+					<section>
+						<h3>Test Example</h3>
+						<pre><code class="java">@Test
+public void nullRequest() {
+    givenRequest(null);
+    whenRequestIsExecuted();
+    thenErrorMessageIs("Null shall not pass!");
+}</code></pre>
+						<p class="fragment">Let's make it pass</p>
+						<pre class="fragment"><code class="java">@Override
+public Response execute(Request request) {
+    throw new NullPointerException("Null shall not pass!");
+}</code></pre>
+					</section>
+
+					<section>
+						<h3>The use case executor</h3>
+						<pre><code class="java">public interface UsecaseExecutor {
+    &lt;Request, Response&gt; Response execute(Request request);
+}</code></pre>
+						<ul>
+							<li>The interface your main application is using</li>
+							<li>Main passes a request and expects a response</li>
+							<li>Implementation finds a fitting use case and executes it</li>
+						</ul>
+					</section>
+
+					<section>
+						<h3>Manual use case executor</h3>
+						<pre><code class="java">public class BusinessLogic extends ManualUsecaseExecutor {
+    public BusinessLogic() {
+      addUsecase(() -> new Login());
+    }
+}</code></pre>
+						<ul>
+							<li>Most simple UsecaseExecutor implemention</li>
+							<li>Usecases (and their dependencies) are managed by hand</li>
+							<li>Allows to switch to a DI framework easily</li>
+						</ul>
+					</section>
+
+					<section>
+						<h3>Guice use case executor</h3>
+						<pre><code class="java">public class BusinessLogic extends GuiceUsecaseExecutor {
+    public BusinessLogic() {
+        super(Guice.createInjector());
+        addUsecase(Login.class);
+    }
+}</code></pre>
+						<ul>
+							<li>Usecases (and their dependencies) are managed by <a href="https://github.com/google/guice">Google Guice</a></li>
+							<li>Public business logic API remains unaffected</li>
+							<li>Easily switch to <a href="https://projects.spring.io/spring-framework/">Spring</a> or any other DI framework</li>
+						</ul>
+					</section>
+
+					<section>
+						<h3>How it's used</h3>
+						<pre><code class="java">@POST("/login")
+@Consumes(MediaType.APPLICATION_JSON)
+@Produces(MediaType.APPLICATION_JSON)
+public Login.Response login(Login.Request request) {
+    return businessLogic.execute(request);
+}</code></pre>
+						<ul>
+							<li>A RESTful call typically comes down to one line</li>
+							<li>The call remains the same, no matter what executor you decide to use</li>
+						</ul>
+					</section>
+				</section>
+
+				<section>
+					<section>
+						<h2>Coding Session</h2>
+					</section>
+					<section>
+						<h3>System we will extend</h3>
+						<ul>
+							<li class="fragment">Backend of indie game <a href="https://mazebert.com/">Mazebert TD</a></li>
+							<li class="fragment">Already embraces JUsecase</li>
+							<li class="fragment">Created TDD style, current test coverage <a href="https://github.com/casid/mazebert-ladder">92%</a></li>
+						</ul>
+					</section>
+					<section>
+						<h3>Use case</h3>
+						<ul>
+							<li class="fragment">Allow players to get free fan merchandise</li>
+							<li class="fragment">Validate shipping information</li>
+							<li class="fragment">All players with a registered e-mail and level 70 can do it!</li>
+							<li class="fragment">Notify dev by e-mail</li>
+							<li class="fragment">Mark player to receive merchandise</li>
+						</ul>
+					</section>
+				</section>
+
+				<section>
+					<h2>Q &amp; A</h2>
+				</section>
+
+				<section>
+					<h2>Thank you!</h2>
+					<small class="fragment">
+						JUsecase on <a href="https://github.com/casid/jusecase">GitHub</a><br/>
+						Mazebert TD Backend on <a href="https://github.com/casid/mazebert-ladder">GitHub</a><br/>
+						Twitter <a href="http://twitter.com/mazebert">@mazebert</a>
+					</small>
+				</section>
+
+			</div>
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+			// More info https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				history: true,
+
+				// More info https://github.com/hakimel/reveal.js#dependencies
+				dependencies: [
+					{ src: 'plugin/markdown/marked.js' },
+					{ src: 'plugin/markdown/markdown.js' },
+					{ src: 'plugin/notes/notes.js', async: true },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+				]
+			});
+		</script>
+	</body>
+</html>
